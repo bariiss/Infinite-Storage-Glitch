@@ -1,27 +1,42 @@
-FROM ubuntu:24.04
+FROM --platform=$BUILDPLATFORM ubuntu:24.04
 
-# Non-interactive mode for apt-get
+# Build args from Buildx
+ARG TARGETPLATFORM
+ARG BUILDPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
+
+# Non-interactive APT
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install dependencies
-RUN apt-get update
-RUN apt-get install -y git 
-RUN apt-get install -y curl 
-RUN apt-get install -y libopencv-dev 
-RUN apt-get install -y ffmpeg
-RUN apt-get install -y build-essential
-RUN apt-get install -y libssl-dev
-RUN apt-get install -y clang libclang-dev
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libopencv-dev \
+    ffmpeg \
+    build-essential \
+    libssl-dev \
+    clang \
+    libclang-dev \
+    pkg-config \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install Rust
-RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+# Install Rust for TARGETARCH
+# Use rustup-init with target-specific installation
+RUN curl -fsSL https://sh.rustup.rs -o rustup-init.sh && \
+    chmod +x rustup-init.sh && \
+    ./rustup-init.sh -y --default-toolchain stable && \
+    rm rustup-init.sh
+
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Set the working directory 
+# Set working directory
 WORKDIR /home/Infinite-Storage-Glitch
 
-# Set cargo home to a folder in the working directory this will make rebuild 
-# faster as it allows the cargo cache to be saved between docker runs. 
+# Set cargo home for better caching
 ENV CARGO_HOME=/home/Infinite-Storage-Glitch/cargo_home
 
+# Default command
 CMD ["/bin/bash"]
