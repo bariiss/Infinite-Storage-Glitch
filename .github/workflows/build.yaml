@@ -51,9 +51,9 @@ jobs:
       - name: Generate Unique Tag
         id: unique_tag
         run: |
-          UNIQUE_TAG="$(date +%Y%m%d%H%M%S)"
+          UNIQUE_TAG="v$(date +%Y%m%d%H%M%S)"
           echo "Generated unique tag: $UNIQUE_TAG"
-          echo "unique_tag=v$UNIQUE_TAG" >> $GITHUB_OUTPUT
+          echo "unique_tag=$UNIQUE_TAG" >> $GITHUB_OUTPUT
 
       - name: Build and Push Multi-Arch Image (with swag + scratch)
         uses: docker/build-push-action@v6
